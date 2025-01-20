@@ -3,6 +3,7 @@ import s3 from "@/lib/clients/cloudflare";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { createClient } from "@/lib/utils/supabase/server";
 import { authMiddleware } from "@/lib/middleware/authMiddleware";
+import { revalidateTag } from "next/cache";
 
 /**
  * API Route: Handles PDF document deletion.
@@ -12,12 +13,14 @@ import { authMiddleware } from "@/lib/middleware/authMiddleware";
  * - Removes document metadata from database
  * - Handles authentication and authorization
  * - Cleans up associated resources
+ * - Revalidates cache tags for UI consistency
  *
  * **Process:**
  * 1. Authenticates the user
  * 2. Retrieves document metadata from database
  * 3. Deletes file from cloud storage
  * 4. Removes database entries
+ * 5. Revalidates related cache tags
  *
  * **Security:**
  * - Requires user authentication
@@ -32,14 +35,28 @@ export async function POST(request: NextRequest) {
   const authResponse = await authMiddleware(request);
   if (authResponse.status === 401) return authResponse;
 
-  const { documentId } = await request.json();
   const supabase = createClient();
+  const { documentId } = await request.json();
 
-  // Retrieve document metadata
+  // Get the user ID properly from Supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id;
+
+  if (!userId) {
+    return NextResponse.json(
+      { error: "User not authenticated" },
+      { status: 401 }
+    );
+  }
+
+  // Retrieve document metadata and verify ownership
   const { data: document, error } = await supabase
     .from("pdf_documents")
     .select("file_url")
     .eq("id", documentId)
+    .eq("user_id", userId)
     .single();
 
   if (error || !document) {
@@ -55,7 +72,16 @@ export async function POST(request: NextRequest) {
   try {
     // Delete from cloud storage and database
     await s3.send(deleteCommand);
-    await supabase.from("pdf_documents").delete().eq("id", documentId);
+    await supabase
+      .from("pdf_documents")
+      .delete()
+      .eq("id", documentId)
+      .eq("user_id", userId);
+
+    // Revalidate cache tags with correct userId
+    revalidateTag(`pdf_document_${documentId}`);
+    revalidateTag(`user_${userId}_pdf_documents`);
+
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("Error deleting document:", error);

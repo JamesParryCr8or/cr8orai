@@ -34,6 +34,11 @@ export const AI_MODEL_DISPLAY = {
     logo: "/providers/xai.png",
     vision: false,
   },
+  "deepseek-chat": {
+    name: "DeepSeek Chat",
+    logo: "/providers/deepseek.png",
+    vision: false,
+  },
   // "grok-vision-beta": {
   //   name: "Grok Vision",
   //   logo: "/providers/xai.png",

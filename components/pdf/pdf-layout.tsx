@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import PdfAppInfo from "@/components/pdf/PdfAppInfo";
-import UploadDialog from "./UploadDialog";
-import YourFiles from "./YourFiles";
+import UploadDialog from "./pdf-upload";
+import YourFiles from "./your-files";
 import { useRouter } from "next/navigation";
 import Login from "@/components/input/login";
 
@@ -111,35 +110,28 @@ export default function PdfLayout({
   };
 
   return (
-    <section className="relative min-h-screen">
-      <div className="flex flex-col md:flex-row items-start no-scrollbar">
-        <div className="w-full md:w-1/2 no-scrollbar">
-          <PdfAppInfo />
-        </div>
-        <div className="w-full px-8 md:w-1/2">
-          {userEmail ? (
-            <>
-              <div className="mt-4 flex justify-center">
-                <UploadDialog
-                  fileUrl={fileUrl}
-                  fileName={fileName}
-                  setFileUrl={setFileUrl}
-                  setFileName={setFileName}
-                  handleUpload={handleUpload}
-                  handleUrlSubmit={handleUrlSubmit}
-                  status={status}
-                  response={response}
-                />
-              </div>
-              {documents && documents.length > 0 && (
-                <YourFiles documents={documents} />
-              )}
-            </>
-          ) : (
-            <Login />
+    <div className="w-full">
+      {userEmail ? (
+        <>
+          <div className="mt-4 flex justify-center">
+            <UploadDialog
+              fileUrl={fileUrl}
+              fileName={fileName}
+              setFileUrl={setFileUrl}
+              setFileName={setFileName}
+              handleUpload={handleUpload}
+              handleUrlSubmit={handleUrlSubmit}
+              status={status}
+              response={response}
+            />
+          </div>
+          {documents && documents.length > 0 && (
+            <YourFiles documents={documents} />
           )}
-        </div>
-      </div>
-    </section>
+        </>
+      ) : (
+        <Login />
+      )}
+    </div>
   );
 }

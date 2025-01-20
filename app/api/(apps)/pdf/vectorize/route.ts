@@ -5,6 +5,7 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { Document } from "langchain/document";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { authMiddleware } from "@/lib/middleware/authMiddleware";
+import { revalidateTag } from "next/cache";
 
 /**
  * API Route: Handles PDF vectorization for semantic search capabilities.
@@ -15,6 +16,7 @@ import { authMiddleware } from "@/lib/middleware/authMiddleware";
  * - Stores embeddings in Supabase for vector similarity search
  * - Maintains page numbers and document references
  * - Sanitizes text to remove problematic characters
+ * - Revalidates cache tags for UI consistency
  *
  * **Process:**
  * 1. Authenticates the user
@@ -22,6 +24,7 @@ import { authMiddleware } from "@/lib/middleware/authMiddleware";
  * 3. Splits document into chunks using LangChain
  * 4. Generates embeddings using OpenAI
  * 5. Stores embeddings with metadata in Supabase
+ * 6. Revalidates related cache tags
  *
  * **Technical Details:**
  * - Chunk size: 1000 characters
@@ -67,6 +70,7 @@ export async function POST(request: NextRequest) {
 
   const supabase = createClient();
   const { fileUrl, documentId } = await request.json();
+  const userId = (request as any).user.id; // Get userId from middleware-enhanced request
 
   if (!fileUrl || typeof fileUrl !== "string") {
     return NextResponse.json(
@@ -169,6 +173,10 @@ export async function POST(request: NextRequest) {
         throw supabaseError;
       }
     }
+
+    // Revalidate cache tags
+    revalidateTag(`pdf_document_${documentId}`);
+    revalidateTag(`user_${userId}_pdf_documents`);
 
     return NextResponse.json({
       text: "Successfully embedded PDF",

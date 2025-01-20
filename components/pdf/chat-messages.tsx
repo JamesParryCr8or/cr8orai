@@ -2,54 +2,14 @@ import { Message as VercelChatMessage } from "ai";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
-import { CodeBlock } from "@/components/ui/codeblock";
-import { MemoizedReactMarkdown } from "@/components/pdf/ChatMarkdown";
+import { MemoizedReactMarkdown } from "@/components/pdf/markdown";
 import { IconOpenAI } from "@/components/ui/icons";
-import { ChatMessageActions } from "@/components/pdf/ChatMessageActions";
+import { ChatMessageActions } from "@/components/pdf/chat-message-actions";
 
 export interface ChatMessageProps {
   message: VercelChatMessage;
   sources: any[];
 }
-
-type CodeComponentProps = {
-  inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-  [key: string]: any;
-};
-
-const CodeComponent = ({
-  inline,
-  className,
-  children,
-  ...props
-}: CodeComponentProps) => {
-  const childText =
-    Array.isArray(children) && children[0] ? String(children[0]) : "";
-  if (childText === "▍") {
-    return <span className="mt-1 animate-pulse cursor-default">▍</span>;
-  }
-
-  const match = /language-(\w+)/.exec(className || "");
-
-  if (inline) {
-    return (
-      <code className={className} {...props}>
-        {children}
-      </code>
-    );
-  }
-
-  return (
-    <CodeBlock
-      key={Math.random()}
-      language={(match && match[1]) || ""}
-      value={String(children).replace(/\n$/, "")}
-      {...props}
-    />
-  );
-};
 
 export function ChatMessages({ message, sources }: ChatMessageProps) {
   const colorClassName =
@@ -78,7 +38,6 @@ export function ChatMessages({ message, sources }: ChatMessageProps) {
             <MemoizedReactMarkdown
               className="prose"
               remarkPlugins={[remarkGfm, remarkMath]}
-              components={{ code: CodeComponent }}
             >
               {message.content}
             </MemoizedReactMarkdown>

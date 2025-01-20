@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState, ReactElement, FormEvent } from "react";
 import { useChat } from "ai/react";
-import { ChatMessages } from "@/components/pdf/ChatMessages";
+import { ChatMessages } from "@/components/pdf/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { ChatInputField } from "@/components/pdf/ChatInputField";
+import { ChatInputField } from "@/components/pdf/chat-input-field";
 
 type MessageRole =
   | "function"

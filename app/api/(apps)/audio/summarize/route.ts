@@ -1,4 +1,4 @@
-import { groq } from "@ai-sdk/groq";
+import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { createClient } from "@/lib/utils/supabase/server";
 import { NextResponse, NextRequest } from "next/server";
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     // Generate structured summary using ai-sdk
     const { object: responseData } = await generateObject({
-      model: groq(toolConfig.aiModel),
+      model: openai(toolConfig.aiModel),
       schema: SummarizeSchema,
       system: toolConfig.systemMessage,
       prompt: transcript,

@@ -5,7 +5,7 @@ import { Rocket } from "lucide-react";
 export default function InfoCard() {
   return (
     <AppInfoCard
-      title="Product Hunt Launch Day Simulator"
+      title="Product Hunt Launch Chaos Simulator"
       colorScheme={{
         background: "bg-gradient-to-br from-orange-50 to-amber-50",
         border: "border-orange-200",
@@ -14,11 +14,11 @@ export default function InfoCard() {
       }}
       overview={{
         icon: <Rocket className="w-5 h-5" />,
-        title: "Product Hunt Demo App Overview",
+        title: "xAI Grok Demo App Overview",
         description:
-          "This demo app uses xAI's Grok to simulate Product Hunt launches with metrics and community interactions. You can use the building blocks of this app to create your own AI apps. Includes complete source code and documentation.",
+          "This demo app uses xAI's Grok to simulate Product Hunt launches with metrics and community interactions. You can use the building blocks of this app to create your own AI apps. Includes complete source code and",
         docsLink: {
-          href: "https://docs.anotherwrapper.com/apps/producthunt",
+          href: "https://docs.anotherwrapper.com/ai/grok",
           text: "documentation",
         },
       }}

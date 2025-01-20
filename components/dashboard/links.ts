@@ -10,6 +10,7 @@ import {
   IconCurrencyDollar,
   IconPencil,
   IconHome,
+  IconLayoutDashboard,
 } from "@tabler/icons-react";
 
 type NavLink = {
@@ -18,6 +19,7 @@ type NavLink = {
   icon: any;
   isExternal?: boolean;
   isNew?: boolean;
+  isUpdated?: boolean;
 };
 
 export const freeTools = [
@@ -33,8 +35,23 @@ export const freeTools = [
   },
 ];
 
+export const overviewLinks: NavLink[] = [
+  { href: "/apps", label: "Overview", icon: IconLayoutDashboard },
+  {
+    href: "https://anotherwrapper.lemonsqueezy.com/affiliates",
+    isExternal: true,
+    label: "Affiliates (50%)",
+    icon: IconCurrencyDollar,
+  },
+];
+
 export const navlinks: NavLink[] = [
-  { href: "/apps/audio/app", label: "Audio AI", icon: IconMicrophone },
+  {
+    href: "/apps/audio/app",
+    label: "Audio AI",
+    icon: IconMicrophone,
+    isUpdated: true,
+  },
   { href: "/apps/llama/app", label: "Llama 3", icon: IconBolt },
   { href: "/apps/gpt/app", label: "OpenAI GPT", icon: IconMessage },
   { href: "/apps/dalle/app", label: "DALL-E", icon: IconPhoto },
@@ -57,7 +74,7 @@ export const navlinks: NavLink[] = [
     icon: IconRobot,
   },
   { href: "/apps/grok", label: "xAI Grok", icon: IconBolt, isNew: true },
-  { href: "/apps/pdf", label: "PDF AI", icon: IconFileText },
+  { href: "/apps/pdf", label: "PDF AI", icon: IconFileText, isUpdated: true },
   { href: "/apps/voice", label: "Voice AI", icon: IconMicrophone },
 ];
 

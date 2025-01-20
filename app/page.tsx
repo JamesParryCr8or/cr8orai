@@ -1,22 +1,34 @@
-import { companyConfig } from "@/config";
-import Navbar from "@/components/navbars/Navbar-1";
-import Footer from "@/components/footers/Footer-1";
-import Apps from "@/components/anotherwrapper/Apps";
-import HeroDemos from "@/components/heros/HeroDemos";
+import { apps } from "@/lib/ai/apps";
+import { CardApp } from "@/components/dashboard/card-app";
+import { HeaderApps } from "@/components/dashboard/header-apps";
+import { FaqSection } from "@/components/dashboard/faq-section";
+import { DashboardLayout } from "@/components/dashboard/Layout";
 
-export default function Home() {
+export const metadata = {
+  title: "Next.js Templates & AI Boilerplate Code | AI Wrapper Templates",
+  description:
+    "Production-ready Next.js templates and AI boilerplate code. Start your AI project with pre-built AI templates, authentication, payments, and more.",
+  keywords:
+    "nextjs template, nextjs templates, boilerplate code, ai wrapper, nextjs boilerplate",
+};
+
+export default async function Page() {
   return (
-    <div className="bg-base-100">
-      <Navbar
-        companyConfig={companyConfig.company!}
-        navbarConfig={companyConfig.navbarLanding!}
-      />
-      <HeroDemos />
-      <Apps />
-      <Footer
-        companyConfig={companyConfig.company!}
-        footerConfig={companyConfig.footerLanding!}
-      />
-    </div>
+    <DashboardLayout showGreeting={false}>
+      <main className="mx-auto w-full px-6 lg:px-12 xl:px-16 max-w-screen-xl mb-auto relative bg-white">
+        {/* Decorative background blur */}
+        <div className="w-[600px] h-40 select-none pointer-events-none blur-[100px] opacity-50 absolute -rotate-12 -top-44 -left-20" />
+
+        <HeaderApps />
+
+        <div className="mt-14 flex flex-col gap-y-8">
+          {apps.map((app) => (
+            <CardApp key={app.href} {...app} />
+          ))}
+        </div>
+
+        <FaqSection />
+      </main>
+    </DashboardLayout>
   );
 }

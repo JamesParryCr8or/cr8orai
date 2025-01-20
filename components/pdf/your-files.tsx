@@ -68,51 +68,59 @@ const YourFiles: React.FC<YourFilesProps> = ({ documents }) => {
   };
 
   return (
-    <div>
-      <div className="space-y-1 mb-4 mt-4">
-        <h4 className="text-sm font-medium leading-none">Your files</h4>
-        <p className="text-sm text-muted-foreground">
+    <div className="w-full max-w-5xl mx-auto">
+      <div className="space-y-2 mb-8">
+        <h2 className="text-xl font-semibold tracking-tight">
+          You have {documents.length} documents in your library
+        </h2>
+        <p className="text-base text-sm text-muted-foreground">
           You can view and delete your uploaded files here.
         </p>
       </div>
 
       {documents && (
-        <div className="overflow-x-auto">
+        <div className="rounded-xl border border-border/40 bg-background shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>File Name</TableHead>
-                <TableHead className="text-center">Uploaded</TableHead>
-                <TableHead className="text-center hidden md:table-cell">
+                <TableHead className="text-base font-medium text-sm text-muted-foreground">
+                  File Name
+                </TableHead>
+                <TableHead className="text-base font-medium text-sm text-muted-foreground text-center">
+                  Uploaded
+                </TableHead>
+                <TableHead className="text-base font-medium text-sm text-muted-foreground text-center hidden md:table-cell">
                   Size
                 </TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="w-[80px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {currentDocuments.map((doc: any) => (
-                <TableRow key={doc.id}>
-                  <TableCell>
+                <TableRow
+                  key={doc.id}
+                  className="hover:bg-muted/40 transition-colors duration-200"
+                >
+                  <TableCell className="py-4">
                     <a
                       href={`/pdf/document/${doc.id}`}
-                      className="text-primary hover:underline"
+                      className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
                     >
                       {doc.file_name}
                     </a>
                   </TableCell>
-                  <TableCell className="text-center text-sm text-gray-500">
+                  <TableCell className="text-center text-muted-foreground">
                     {formatDistanceToNow(new Date(doc.created_at))} ago
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-center text-sm text-gray-500">
+                  <TableCell className="hidden md:table-cell text-center text-muted-foreground">
                     {doc.size ? `${doc.size} MB` : "N/A"}
                   </TableCell>
                   <TableCell>
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button
-                          className="hover:bg-primary/80 hover:text-white flex items-center space-x-1"
+                          className="rounded-full size-9 p-0 hover:bg-destructive/10 hover:text-destructive transition-colors duration-200"
                           variant="ghost"
-                          color="red"
                           onClick={() => setSelectedDoc(doc)}
                         >
                           <TrashIcon className="w-4 h-4" />
@@ -140,38 +148,42 @@ const YourFiles: React.FC<YourFilesProps> = ({ documents }) => {
             </TableBody>
           </Table>
 
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  className="hover:bg-primary/80 hover:text-white"
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
+          <div className="py-4 px-2 border-t border-border/40">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
                     href="#"
-                    className="hover:bg-primary/80 hover:text-white"
-                    onClick={() => handlePageChange(i + 1)}
-                    isActive={i + 1 === currentPage}
-                  >
-                    {i + 1}
-                  </PaginationLink>
+                    className="hover:bg-muted/40 transition-colors duration-200"
+                    onClick={() =>
+                      handlePageChange(Math.max(1, currentPage - 1))
+                    }
+                  />
                 </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  className="hover:bg-primary/80 hover:text-white"
-                  onClick={() =>
-                    handlePageChange(Math.min(totalPages, currentPage + 1))
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      href="#"
+                      className="hover:bg-muted/40 transition-colors duration-200"
+                      onClick={() => handlePageChange(i + 1)}
+                      isActive={i + 1 === currentPage}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    className="hover:bg-muted/40 transition-colors duration-200"
+                    onClick={() =>
+                      handlePageChange(Math.min(totalPages, currentPage + 1))
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/utils/supabase/server";
 import fetch from "node-fetch";
 import { replicate } from "@/lib/clients/replicate";
+import { revalidateTag } from "next/cache";
 
 /**
  * API Route: Transcribes audio files using Replicate's Whisper model.
@@ -11,11 +12,13 @@ import { replicate } from "@/lib/clients/replicate";
  * 2. Fetches the audio file from the provided URL.
  * 3. Transcribes the audio using Replicate's Whisper model.
  * 4. Stores the transcription data in Supabase.
- * 5. Returns the transcription ID and text.
+ * 5. Revalidates related cache tags.
+ * 6. Returns the transcription ID and text.
  *
  * The transcription includes:
  * - Full text transcription
  * - Timestamped chunks for precise audio segment mapping
+ * - Cache revalidation for UI consistency
  *
  * @param {Request} request - The incoming request object containing recordingId and audioUrl.
  * @returns {Promise<NextResponse>} JSON response containing the transcription details.
@@ -93,6 +96,11 @@ export async function POST(request: any) {
         { status: 500 }
       );
     }
+
+    // Revalidate cache tags
+    revalidateTag(`recording_${recordingId}`);
+    revalidateTag(`transcript_${recordingId}`);
+    revalidateTag(`user_${userId}_recordings`);
 
     return new NextResponse(
       JSON.stringify({

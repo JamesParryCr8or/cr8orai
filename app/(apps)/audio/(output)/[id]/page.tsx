@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import RecordingLayout from "@/components/audio/RecordingLayout";
+import RecordingTranscript from "@/components/audio/recording-transcript";
 import Section from "@/components/Section";
 import {
   getSession,
@@ -35,7 +35,7 @@ export default async function Page({ params }: { params: { id: string } }) {
 
   return (
     <Section>
-      <RecordingLayout data={data} />
+      <RecordingTranscript data={data} />
     </Section>
   );
 }

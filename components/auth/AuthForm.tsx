@@ -1,16 +1,44 @@
+"use client";
+
 import React, { useState } from "react";
+import { Mail } from "lucide-react"; 
 
 interface AuthFormProps {
-  onEmailSubmit: (email: string) => void;
-  isLoading: boolean;
+  next?: string;
+  onSuccess?: (message: string) => void;
+  onError?: (message: string) => void;
 }
 
-export default function AuthForm({ onEmailSubmit, isLoading }: AuthFormProps) {
+export default function AuthForm({ next, onSuccess, onError }: AuthFormProps) {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onEmailSubmit(email);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, next }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === "Success") {
+        onSuccess?.(data.message);
+      } else {
+        throw new Error(data.message || "Failed to send magic link");
+      }
+    } catch (error) {
+      console.error("Error sending magic link:", error);
+      onError?.(error instanceof Error ? error.message : "Failed to send magic link");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -23,7 +51,7 @@ export default function AuthForm({ onEmailSubmit, isLoading }: AuthFormProps) {
           type="email"
           placeholder="tupac@shakur.com"
           required
-          className="input w-full p-3 rounded-xl shadow-sm focus:outline-none border-base-300 bg-base-200 text-base-content-content"
+          className="input w-full p-3 rounded-xl shadow-sm focus:outline-none border-base-300 bg-white text-base-content-content"
         />
       </div>
 
@@ -36,43 +64,7 @@ export default function AuthForm({ onEmailSubmit, isLoading }: AuthFormProps) {
         }`}
         role="button"
       >
-        {!isLoading && (
-          <svg
-            viewBox="0 0 24 24"
-            className="h-5 w-5 mr-2"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-            <g
-              id="SVGRepo_tracerCarrier"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            ></g>
-            <g id="SVGRepo_iconCarrier">
-              <g id="style=linear">
-                <g id="email">
-                  <path
-                    id="vector"
-                    d="M17 20.5H7C4 20.5 2 19 2 15.5V8.5C2 5 4 3.5 7 3.5H17C20 3.5 22 5 22 8.5V15.5C22 19 20 20.5 17 20.5Z"
-                    stroke="#ffffff"
-                    strokeWidth="1.5"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  ></path>
-                  <path
-                    id="vector_2"
-                    d="M18.7698 7.7688L13.2228 12.0551C12.5025 12.6116 11.4973 12.6116 10.777 12.0551L5.22998 7.7688"
-                    stroke="#ffffff"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  ></path>
-                </g>
-              </g>
-            </g>
-          </svg>
-        )}
+        {!isLoading && <Mail className="h-5 w-5 mr-2" />}
         {isLoading ? "Loading..." : "Send Magic Link"}
       </button>
     </form>

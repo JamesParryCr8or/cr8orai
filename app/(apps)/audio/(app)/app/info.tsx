@@ -7,10 +7,10 @@ export default function AudioInfo() {
     <AppInfoCard
       title="Audio Transcription & Summarization"
       colorScheme={{
-        background: "bg-gradient-to-br from-red-50/80 to-slate-50",
-        border: "border-red-200",
-        text: "text-red-600",
-        textMuted: "text-red-600",
+        background: "bg-gradient-to-br from-primary/5 to-primary/10",
+        border: "border-primary/10",
+        text: "text-primary",
+        textMuted: "text-primary",
       }}
       overview={{
         icon: <Mic className="w-4 h-4" />,

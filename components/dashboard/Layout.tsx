@@ -10,7 +10,7 @@ import { UnifiedSidebar } from "@/components/dashboard/UnifiedSidebar";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  toolConfig: ToolConfig;
+  toolConfig?: ToolConfig;
   showGreeting?: boolean;
 }
 
@@ -47,10 +47,12 @@ export async function DashboardLayout({
         </div>
       </div>
       <Suspense fallback={<LoadingSpinner />}>
-        <Footer
-          companyConfig={toolConfig.company!}
-          footerConfig={toolConfig.footerApp!}
-        />
+        {toolConfig && (
+          <Footer
+            companyConfig={toolConfig.company!}
+            footerConfig={toolConfig.footerApp!}
+          />
+        )}
       </Suspense>
     </>
   );
@@ -63,7 +65,7 @@ async function MainContent({
   user,
 }: {
   children: React.ReactNode;
-  toolConfig: ToolConfig;
+  toolConfig?: ToolConfig;
   showGreeting: boolean;
   user: any;
 }) {
@@ -73,7 +75,7 @@ async function MainContent({
   } = await supabase.auth.getUser();
 
   let credits;
-  if (user && toolConfig.paywall) {
+  if (user && toolConfig?.paywall) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("*")

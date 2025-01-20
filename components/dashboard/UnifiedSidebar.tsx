@@ -14,9 +14,16 @@ import { isMobile } from "@/lib/utils";
 import { SidebarHistory } from "@/components/chat/sidebar/sidebar-history";
 import { Badge } from "@/components/dashboard/Badge";
 import { Heading } from "./Heading";
+import { IconLogout, IconLogin } from "@tabler/icons-react";
 
 // Import navlinks from config
-import { navlinks, freeTools, landingPages, otherLinks } from "./links";
+import {
+  navlinks,
+  freeTools,
+  landingPages,
+  otherLinks,
+  overviewLinks,
+} from "./links";
 
 interface UnifiedSidebarProps {
   user: User | null;
@@ -26,6 +33,12 @@ interface UnifiedSidebarProps {
 const NewBadge = () => (
   <span className="ml-2 inline-flex items-center rounded-lg bg-sky-500/10 px-1.5 py-0.5 text-[10px] font-medium text-sky-500 ring-1 ring-inset ring-sky-500/20">
     New
+  </span>
+);
+
+const UpdatedBadge = () => (
+  <span className="ml-2 inline-flex items-center rounded-lg bg-green-500/10 px-1.5 py-0.5 text-[10px] font-medium text-green-500 ring-1 ring-inset ring-emerald-500/20">
+    Updated
   </span>
 );
 
@@ -60,121 +73,140 @@ export function UnifiedSidebar({
   const otherNavlinks = navlinks.filter((link) => link.label !== "Chat AI");
 
   const renderLinks = useCallback(
-    (links: any[], heading: string, defaultExternal: boolean = false) => (
-      <>
-        <Heading
-          as="p"
-          className="text-sm md:text-sm lg:text-sm px-2 pt-2 mb-2"
-        >
-          {heading}
-        </Heading>
+    (links: any[], heading: string, defaultExternal: boolean = false) => {
+      // Add logout/login link to otherLinks when rendering that section
+      const linksToRender =
+        heading === "Other"
+          ? [
+              ...links,
+              user
+                ? {
+                    href: "/api/auth/signout",
+                    label: "Logout",
+                    icon: IconLogout,
+                  }
+                : { href: "/auth", label: "Login", icon: IconLogin },
+            ]
+          : links;
 
-        {/* Always render Chat AI first in Demo Apps section */}
-        {heading === "Demo Apps" && chatLink && (
-          <>
-            {showChatHistory ? (
-              <div className="mb-1">
-                <button
-                  onClick={() => setIsChatExpanded(!isChatExpanded)}
+      return (
+        <>
+          <Heading
+            as="p"
+            className="text-sm md:text-sm lg:text-sm px-2 pt-2 mb-2"
+          >
+            {heading}
+          </Heading>
+
+          {/* Always render Chat AI first in Demo Apps section */}
+          {heading === "Demo Apps" && chatLink && (
+            <>
+              {showChatHistory ? (
+                <div className="mb-1">
+                  <button
+                    onClick={() => setIsChatExpanded(!isChatExpanded)}
+                    className={twMerge(
+                      "w-full text-primary hover:text-primary/50 transition duration-200 flex items-center justify-between py-2 px-4 rounded-md text-sm",
+                      pathname.includes("/chat") &&
+                        "bg-white shadow-lg text-primary"
+                    )}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <chatLink.icon
+                        className={twMerge(
+                          "h-4 w-4 flex-shrink-0",
+                          pathname.includes("/chat") && "text-sky-500"
+                        )}
+                      />
+                      <span>{chatLink.label}</span>
+                      {chatLink.isNew && <NewBadge />}
+                    </div>
+                    <IconChevronRight
+                      className={`h-4 w-4 transition-transform duration-200 ${
+                        isChatExpanded ? "rotate-90" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {isChatExpanded && (
+                    <div className="ml-4">
+                      <SidebarHistory
+                        user={user ?? undefined}
+                        limit={3}
+                        showAllHistory={showAllHistory}
+                        setShowAllHistory={setShowAllHistory}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href={chatLink.href}
+                  prefetch={!chatLink.isExternal}
+                  target={chatLink.isExternal ? "_blank" : undefined}
+                  rel={chatLink.isExternal ? "noopener noreferrer" : undefined}
+                  onClick={() => isMobile() && setOpen(false)}
                   className={twMerge(
-                    "w-full text-primary hover:text-primary/50 transition duration-200 flex items-center justify-between py-2 px-4 rounded-md text-sm",
-                    pathname.includes("/chat") &&
-                      "bg-white shadow-lg text-primary"
+                    "text-primary hover:text-primary/50 transition duration-200 flex items-center space-x-2 py-2 px-4 rounded-md text-sm",
+                    isActive(chatLink.href) && "bg-white shadow-lg text-primary"
                   )}
                 >
-                  <div className="flex items-center space-x-2">
-                    <chatLink.icon
-                      className={twMerge(
-                        "h-4 w-4 flex-shrink-0",
-                        pathname.includes("/chat") && "text-sky-500"
-                      )}
-                    />
-                    <span>{chatLink.label}</span>
-                    {chatLink.isNew && <NewBadge />}
-                  </div>
-                  <IconChevronRight
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      isChatExpanded ? "rotate-90" : ""
-                    }`}
+                  <chatLink.icon
+                    className={twMerge(
+                      "h-4 w-4 flex-shrink-0",
+                      isActive(chatLink.href) && "text-sky-500"
+                    )}
                   />
-                </button>
+                  <span>{chatLink.label}</span>
+                  {chatLink.isNew && <NewBadge />}
+                </Link>
+              )}
+            </>
+          )}
 
-                {isChatExpanded && (
-                  <div className="ml-4">
-                    <SidebarHistory
-                      user={user ?? undefined}
-                      limit={3}
-                      showAllHistory={showAllHistory}
-                      setShowAllHistory={setShowAllHistory}
-                    />
-                  </div>
-                )}
-              </div>
-            ) : (
+          {/* Render other links */}
+          {linksToRender.map((link) => {
+            if (heading === "Demo Apps" && link.label === "Chat AI")
+              return null;
+            const isExternal = link.isExternal ?? defaultExternal;
+
+            return (
               <Link
-                href={chatLink.href}
-                prefetch={!chatLink.isExternal}
-                target={chatLink.isExternal ? "_blank" : undefined}
-                rel={chatLink.isExternal ? "noopener noreferrer" : undefined}
-                onClick={() => isMobile() && setOpen(false)}
+                key={link.href}
+                href={link.href}
+                prefetch={!isExternal}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+                onClick={(e) => {
+                  if (link.label === "Logout") {
+                    e.preventDefault();
+                    fetch(link.href, { method: "POST" }).then(() => {
+                      window.location.href = "/auth";
+                    });
+                  } else if (isMobile()) {
+                    setOpen(false);
+                  }
+                }}
                 className={twMerge(
                   "text-primary hover:text-primary/50 transition duration-200 flex items-center space-x-2 py-2 px-4 rounded-md text-sm",
-                  isActive(chatLink.href) && "bg-white shadow-lg text-primary"
+                  isActive(link.href) && "bg-white shadow-lg text-primary"
                 )}
               >
-                <chatLink.icon
+                <link.icon
                   className={twMerge(
                     "h-4 w-4 flex-shrink-0",
-                    isActive(chatLink.href) && "text-sky-500"
+                    isActive(link.href) && "text-sky-500"
                   )}
                 />
-                <span>{chatLink.label}</span>
-                {chatLink.isNew && <NewBadge />}
+                <span>{link.label}</span>
+                {link.isNew && <NewBadge />}
+                {link.isUpdated && <UpdatedBadge />}
               </Link>
-            )}
-          </>
-        )}
-
-        {/* Render other links */}
-        {links.map((link) => {
-          if (heading === "Demo Apps" && link.label === "Chat AI") return null;
-          const isExternal = link.isExternal ?? defaultExternal;
-
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              prefetch={!isExternal}
-              target={isExternal ? "_blank" : undefined}
-              rel={isExternal ? "noopener noreferrer" : undefined}
-              onClick={(e) => {
-                if (link.label === "Logout") {
-                  e.preventDefault();
-                  fetch(link.href, { method: "POST" }).then(() => {
-                    window.location.href = "/auth";
-                  });
-                } else if (isMobile()) {
-                  setOpen(false);
-                }
-              }}
-              className={twMerge(
-                "text-primary hover:text-primary/50 transition duration-200 flex items-center space-x-2 py-2 px-4 rounded-md text-sm",
-                isActive(link.href) && "bg-white shadow-lg text-primary"
-              )}
-            >
-              <link.icon
-                className={twMerge(
-                  "h-4 w-4 flex-shrink-0",
-                  isActive(link.href) && "text-sky-500"
-                )}
-              />
-              <span>{link.label}</span>
-              {link.isNew && <NewBadge />}
-            </Link>
-          );
-        })}
-      </>
-    ),
+            );
+          })}
+        </>
+      );
+    },
     [
       isActive,
       isChatExpanded,
@@ -199,6 +231,7 @@ export function UnifiedSidebar({
 
             <div className="flex flex-col space-y-1 relative z-40">
               <div className="flex flex-col">
+                {renderLinks(overviewLinks, "Overview")}
                 {renderLinks(navlinks, "Demo Apps")}
                 {renderLinks(landingPages, "Landing Pages", true)}
                 {renderLinks(freeTools, "Free Tools", true)}

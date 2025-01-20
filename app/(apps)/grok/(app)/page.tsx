@@ -2,45 +2,100 @@ import InputCapture from "@/components/input/Input";
 import PaymentModal from "@/components/paywall/Payment";
 import { toolConfig } from "../toolConfig";
 import { UserGenerations } from "@/components/dashboard/UserTextGenerations";
+import { GenerationsList } from "@/app/tools/components/generations-list";
+import { supabase } from "@/lib/utils/supabase/service";
 import {
   getUserGenerations,
   getSession,
   getUserCredits,
 } from "@/lib/db/cached-queries";
 import InfoCard from "./info";
+import { MessageCircle, User, Calendar, Bot } from "lucide-react";
+import { GrokGenerationsList } from "./generations";
+
+const REPORTS_PER_PAGE = 9;
+
+async function getPublicGenerations(page: number = 1) {
+  const start = (page - 1) * REPORTS_PER_PAGE;
+  const end = start + REPORTS_PER_PAGE - 1;
+
+  try {
+    const { count } = await supabase
+      .from("generations")
+      .select("*", { count: "exact", head: true })
+      .ilike("type", `%${toolConfig.type}%`)
+      .not("slug", "is", null);
+
+    const { data: reports } = await supabase
+      .from("generations")
+      .select(
+        `
+        slug,
+        input_data,
+        output_data,
+        title,
+        created_at,
+        model,
+        description
+      `
+      )
+      .ilike("type", `%${toolConfig.type}%`)
+      .not("slug", "is", null)
+      .order("created_at", { ascending: false })
+      .range(start, end);
+
+    return {
+      reports:
+        reports?.map((report) => ({
+          title: report.title || "Untitled Grok Analysis",
+          slug: report.slug,
+          created_at: new Date(report.created_at).toLocaleDateString(),
+          model: report.model,
+          description:
+            report.description ||
+            report.input_data?.prompt?.slice(0, 120) + "...",
+          output_data: report.output_data,
+        })) || [],
+      totalPages: Math.ceil((count || 0) / REPORTS_PER_PAGE),
+      currentPage: page,
+    };
+  } catch (error) {
+    console.error("Error fetching reports:", error);
+    return { reports: [], totalPages: 0, currentPage: 1 };
+  }
+}
 
 // The main page component where users can create new generations
-export default async function Page() {
-  // Check if a user is logged in
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const currentPage = Number(searchParams.page) || 1;
   const user = await getSession();
-  console.log("user", user);
 
-  // Set up variables to store user data
   let credits;
   let generations: any[] = [];
 
-  // If someone is logged in...
   if (user?.email) {
-    // If this tool requires payment...
     if (toolConfig.paywall) {
-      // Check how many credits they have
       credits = await getUserCredits(user.id);
-
-      // If they don't have enough credits, show the payment screen
-      if (credits < toolConfig.credits) {
-        return <PaymentModal />;
-      }
+      if (credits < toolConfig.credits) return <PaymentModal />;
     }
-
-    // Get all their previous generations for this tool
     generations = await getUserGenerations(user.email, toolConfig.type);
   }
 
-  // Show the main page with:
-  // 1. The input form where users can create new generations
-  // 2. A list of their previous generations
+  const { reports, totalPages } = await getPublicGenerations(currentPage);
+
   return (
     <div data-theme={toolConfig.company.theme} className="bg-white">
+      <GrokGenerationsList
+        title="Recently Simulated Launches"
+        reports={reports}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        paginationBaseUrl="/apps/grok"
+      />
       <InputCapture
         toolConfig={toolConfig}
         userEmail={user ? user.email : undefined}

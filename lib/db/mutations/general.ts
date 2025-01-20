@@ -35,7 +35,7 @@ export async function reduceUserCredits(email: string, credits: number) {
       const { data: userData, error: userError } = await client
         .from("profiles")
         .select("credits")
-        .eq("email", email)
+        .eq("email", email as string)
         .single();
 
       if (userError) throw userError;
@@ -50,7 +50,7 @@ export async function reduceUserCredits(email: string, credits: number) {
       const { data, error } = await client
         .from("profiles")
         .update({ credits: updatedCredits })
-        .eq("email", email)
+        .eq("email", email as string)
         .select();
 
       if (error) throw error;

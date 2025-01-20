@@ -90,13 +90,36 @@ export async function uploadFile({
 
     const filePath = `${uploadPath}/${finalFileName}`;
 
-    // Upload to cloud storage
+    // Create the PutObjectCommand
     const putCommand = new PutObjectCommand({
       Bucket: process.env.STORAGE_BUCKET,
       Key: filePath,
       Body: fileBuffer,
       ContentType: contentType,
     });
+
+    // Add custom headers to fix checksum issue
+    const headers: Record<string, string> = {
+      "x-amz-checksum-algorithm": '"CRC32"',
+    };
+
+    putCommand.middlewareStack.add(
+      (next) =>
+        async (args): Promise<any> => {
+          const request = args.request as any;
+
+          if (!request.headers) {
+            request.headers = {};
+          }
+
+          Object.entries(headers).forEach(([key, value]) => {
+            request.headers[key] = value;
+          });
+
+          return next(args);
+        },
+      { step: "build", name: "customHeaders" }
+    );
 
     await s3.send(putCommand);
 

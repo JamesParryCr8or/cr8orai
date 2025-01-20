@@ -54,3 +54,9 @@ const getRedirectUrl = () => {
 };
 
 export const redirectTo = getRedirectUrl();
+
+// Modal redirect with specific next path
+export const redirectToModal = (next?: string) => {
+  const baseUrl = process.env.PRODUCTION_URL || "http://localhost:3000";
+  return next ? `${baseUrl}/auth/confirm?next=${next}` : redirectTo;
+};

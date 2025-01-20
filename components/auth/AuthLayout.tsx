@@ -6,34 +6,11 @@ import MessageDisplay from "@/components/auth/MessageDisplay";
 import React, { useState } from "react";
 import Logo from "@/components/Logo";
 import SocialProof from "@/components/socialproof/SocialProof";
-import { tosUrl, privacyPolicyUrl } from "@/config";
+import { tosUrl, privacyPolicyUrl, homePage } from "@/config";
 
 export default function AuthComponent() {
-  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
-
-  const handleLogin = (email: string) => {
-    setIsLoading(true);
-    fetch("/api/auth", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setMessage(data.message);
-        setMessageType(data.status === "Success" ? "success" : "error");
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        setMessage("An error occurred.");
-        setMessageType("error");
-        setIsLoading(false);
-      });
-  };
 
   return (
     <section className="py-12 bg-base-100 sm:py-16 lg:py-20 w-full h-screen">
@@ -57,7 +34,7 @@ export default function AuthComponent() {
                   Please login or sign up to continue.
                 </p>
                 <div className="py-4">
-                  <GoogleSignInButton />
+                  <GoogleSignInButton next={homePage} />
 
                   <div className="flex flex-col w-full border-opacity-50">
                     <div className="divider">
@@ -65,8 +42,15 @@ export default function AuthComponent() {
                     </div>
 
                     <AuthForm
-                      onEmailSubmit={handleLogin}
-                      isLoading={isLoading}
+                      next={homePage}
+                      onSuccess={(msg) => {
+                        setMessage(msg);
+                        setMessageType("success");
+                      }}
+                      onError={(msg) => {
+                        setMessage(msg);
+                        setMessageType("error");
+                      }}
                     />
 
                     <p className="mt-4 text-xs text-gray-400">

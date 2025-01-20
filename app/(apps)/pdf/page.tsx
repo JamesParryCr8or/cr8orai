@@ -1,7 +1,7 @@
-import PdfLayout from "@/components/pdf/PdfLayout";
+import PdfLayout from "@/components/pdf/pdf-layout";
 import PaymentModal from "@/components/paywall/Payment";
 import { toolConfig } from "./toolConfig";
-import Section from "@/components/Section";
+import AppInfo from "./info";
 import {
   getSession,
   getUserCredits,
@@ -27,12 +27,19 @@ export default async function Page() {
   }
 
   return (
-    <>
-      <PdfLayout
-        userEmail={user ? user.email : undefined}
-        documents={documents}
-        credits={credits}
-      />
-    </>
+    <section className="relative min-h-screen">
+      <div className="flex flex-col md:flex-row items-start no-scrollbar">
+        <div className="w-full md:w-1/2 no-scrollbar">
+          <PdfLayout
+            userEmail={user ? user.email : undefined}
+            documents={documents}
+            credits={credits}
+          />
+        </div>
+        <div className="w-full md:w-1/2 no-scrollbar">
+          <AppInfo />
+        </div>
+      </div>
+    </section>
   );
 }
