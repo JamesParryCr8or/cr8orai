@@ -1,7 +1,11 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { openai } from "@ai-sdk/openai";
+import { generateObject } from "ai";
 import { NextResponse, NextRequest } from "next/server";
 import { uploadToSupabase, reduceUserCredits } from "@/lib/db/mutations";
 import { authMiddleware } from "@/lib/middleware/authMiddleware";
+import { generatePrompt } from "@/app/(apps)/gpt/prompt";
+import { functionSchema } from "@/app/(apps)/gpt/schema";
+import { toolConfig } from "@/app/(apps)/gpt/toolConfig";
 
 /**
  * API Route: Handles AI interactions using OpenAI's GPT models.
@@ -28,36 +32,19 @@ export async function POST(request: NextRequest) {
   const authResponse = await authMiddleware(request);
   if (authResponse.status === 401) return authResponse;
 
+  // Get user from the middleware-enhanced request
+  const user = (request as any).user;
+
   try {
-    // Extract and decode tool path
     const requestBody = await request.json();
-    const toolPath = decodeURIComponent(requestBody.toolPath);
 
-    // Dynamically import tool configurations
-    const { toolConfig } = await import(`@/app/${toolPath}/toolConfig`);
-    const { generatePrompt } = await import(`@/app/${toolPath}/prompt`);
-    const { functionSchema } = await import(`@/app/${toolPath}/schema`);
-
-    // Prepare prompt and function call
-    const prompt = generatePrompt(requestBody);
-    const functionCall = functionSchema[0];
-
-    // Initialize OpenAI with configuration
-    const openAI = new ChatOpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      model: toolConfig.aiModel,
+    // Generate response using GPT through Vercel AI SDK
+    const { object: responseData } = await generateObject({
+      model: openai(toolConfig.aiModel),
+      schema: functionSchema,
+      system: toolConfig.systemMessage,
+      prompt: generatePrompt(requestBody),
     });
-
-    // Setup structured output handling
-    const chatWithStructuredOutput = openAI.withStructuredOutput(functionCall);
-
-    // Generate response from GPT
-    const responseData = await chatWithStructuredOutput.invoke([
-      ["system", String(toolConfig.systemMessage)],
-      ["human", String(prompt)],
-    ]);
-
-    console.log("Response from GPT:", responseData);
 
     // Store generation in database
     const supabaseResponse = await uploadToSupabase(
@@ -68,8 +55,8 @@ export async function POST(request: NextRequest) {
     );
 
     // Handle paywall credits
-    if (toolConfig.paywall === true) {
-      await reduceUserCredits(requestBody.email, toolConfig.credits);
+    if (toolConfig.paywall) {
+      await reduceUserCredits(user.email, toolConfig.credits);
     }
 
     return new NextResponse(
