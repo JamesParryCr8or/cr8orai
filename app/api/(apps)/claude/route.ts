@@ -1,10 +1,14 @@
-import { ChatAnthropic } from "@langchain/anthropic";
+import { anthropic } from "@ai-sdk/anthropic";
+import { generateObject } from "ai";
 import { NextResponse, NextRequest } from "next/server";
 import { uploadToSupabase, reduceUserCredits } from "@/lib/db/mutations";
 import { authMiddleware } from "@/lib/middleware/authMiddleware";
+import { generatePrompt } from "@/app/(apps)/claude/prompt";
+import { businessPlanSchema } from "@/app/(apps)/claude/schema";
+import { toolConfig } from "@/app/(apps)/claude/toolConfig";
 
 /**
- * API Route: Handles AI interactions using Anthropic's Claude model.
+ * API Route: Handles AI interactions using Anthropic's Claude model via Vercel AI SDK.
  *
  * **Features:**
  * - Uses Claude for high-quality, context-aware responses
@@ -28,36 +32,19 @@ export async function POST(request: NextRequest) {
   const authResponse = await authMiddleware(request);
   if (authResponse.status === 401) return authResponse;
 
+  // Get user from the middleware-enhanced request
+  const user = (request as any).user;
+
   try {
-    // Extract and decode tool path
     const requestBody = await request.json();
-    const toolPath = decodeURIComponent(requestBody.toolPath);
 
-    // Dynamically import tool configurations
-    const { toolConfig } = await import(`@/app/${toolPath}/toolConfig`);
-    const { functionSchema } = await import(`@/app/${toolPath}/schema`);
-    const { generatePrompt } = await import(`@/app/${toolPath}/prompt`);
-
-    // Prepare prompt and function call
-    const functionCall = functionSchema[0];
-    const prompt = generatePrompt(requestBody);
-
-    // Initialize Claude with configuration
-    const chat = new ChatAnthropic({
-      model: toolConfig.aiModel,
-      maxTokens: 2000,
+    // Generate response using Claude through Vercel AI SDK
+    const { object: responseData } = await generateObject({
+      model: anthropic(toolConfig.aiModel),
+      schema: businessPlanSchema,
+      system: toolConfig.systemMessage,
+      prompt: generatePrompt(requestBody),
     });
-
-    // Setup structured output handling
-    const chatWithStructuredOutput = chat.withStructuredOutput(functionCall);
-
-    // Generate response from Claude
-    const responseData = await chatWithStructuredOutput.invoke([
-      ["system", String(toolConfig.systemMessage)],
-      ["human", String(prompt)],
-    ]);
-
-    console.log("Response from Anthropic:", responseData);
 
     // Store generation in database
     const supabaseResponse = await uploadToSupabase(
@@ -68,8 +55,8 @@ export async function POST(request: NextRequest) {
     );
 
     // Handle paywall credits
-    if (toolConfig.paywall === true) {
-      await reduceUserCredits(requestBody.email, toolConfig.credits);
+    if (toolConfig.paywall) {
+      await reduceUserCredits(user.email, toolConfig.credits);
     }
 
     return new NextResponse(
