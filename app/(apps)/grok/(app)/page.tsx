@@ -2,7 +2,6 @@ import InputCapture from "@/components/input/Input";
 import PaymentModal from "@/components/paywall/Payment";
 import { toolConfig } from "../toolConfig";
 import { UserGenerations } from "@/components/dashboard/UserTextGenerations";
-import { GenerationsList } from "@/app/tools/components/generations-list";
 import { supabase } from "@/lib/utils/supabase/service";
 import {
   getUserGenerations,
@@ -10,7 +9,6 @@ import {
   getUserCredits,
 } from "@/lib/db/cached-queries";
 import InfoCard from "./info";
-import { MessageCircle, User, Calendar, Bot } from "lucide-react";
 import { GrokGenerationsList } from "./generations";
 
 const REPORTS_PER_PAGE = 9;
