@@ -1,25 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, ReactElement, FormEvent } from "react";
-import { useChat } from "ai/react";
+import { Message } from "ai";
 import { ChatMessages } from "@/components/pdf/chat-messages";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { ChatInputField } from "@/components/pdf/chat-input-field";
-
-type MessageRole =
-  | "function"
-  | "data"
-  | "system"
-  | "user"
-  | "assistant"
-  | "tool";
-
-interface Message {
-  id: string;
-  role: MessageRole;
-  content: string;
-}
 
 export function ChatWindow(props: {
   endpoint: string;
@@ -27,7 +13,7 @@ export function ChatWindow(props: {
   placeholder?: string;
   chatId: string;
   initialMessages: Message[];
-  documentId?: string; // Make documentId optional
+  documentId?: string;
 }) {
   const {
     endpoint,
@@ -39,69 +25,83 @@ export function ChatWindow(props: {
   } = props;
 
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
-
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [sourcesForMessages, setSourcesForMessages] = useState<
     Record<string, any>
   >({});
-
   const { toast } = useToast();
 
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading: chatEndpointIsLoading,
-  } = useChat({
-    api: endpoint,
-    initialMessages,
-    body: {
-      chatId,
-      documentId, // Include documentId if provided
-    },
-    onResponse(response) {
-      const sourcesHeader = response.headers.get("x-sources");
-      const sources = sourcesHeader
-        ? JSON.parse(Buffer.from(sourcesHeader, "base64").toString("utf8"))
-        : [];
-      const messageIndexHeader = response.headers.get("x-message-index");
-      if (sources.length && messageIndexHeader !== null) {
-        setSourcesForMessages({
-          ...sourcesForMessages,
-          [messageIndexHeader]: sources,
-        });
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setInput(e.target.value);
+  };
+
+  const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    setIsLoading(true);
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          chatId,
+          documentId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send message");
       }
-    },
-    onError: (e) => {
+
+      const data = await response.json();
+      const assistantMessage: Message = {
+        id: data.id,
+        role: "assistant",
+        content: data.content,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      // Handle sources if they exist
+      const sourcesHeader = response.headers.get("x-sources");
+      if (sourcesHeader) {
+        const sources = JSON.parse(
+          Buffer.from(sourcesHeader, "base64").toString("utf8")
+        );
+        const messageIndex = response.headers.get("x-message-index");
+        if (messageIndex) {
+          setSourcesForMessages((prev) => ({
+            ...prev,
+            [messageIndex]: sources,
+          }));
+        }
+      }
+    } catch (error) {
       toast({
         title: "Error",
-        description: e.message,
+        description:
+          error instanceof Error ? error.message : "Failed to send message",
       });
-    },
-  });
-
-  async function sendMessage(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (messageContainerRef.current) {
-      messageContainerRef.current.classList.add("grow");
+    } finally {
+      setIsLoading(false);
     }
-    if (!messages.length) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-    if (chatEndpointIsLoading) {
-      return;
-    }
-    handleSubmit(e);
-  }
-
-  // Commented out the scroll into window part because it was giving some issues
-  // useEffect(() => {
-  //   if (messageContainerRef.current && messageContainerRef.current.firstChild) {
-  //     (messageContainerRef.current.firstChild as HTMLElement).scrollIntoView({
-  //       behavior: "smooth",
-  //     });
-  //   }
-  // }, [messages]);
+  };
 
   return (
     <main className="flex flex-col w-full h-full no-scrollbar">
@@ -131,7 +131,7 @@ export function ChatWindow(props: {
             placeholder={placeholder}
             handleInputChange={handleInputChange}
             handleSubmit={sendMessage}
-            isLoading={chatEndpointIsLoading}
+            isLoading={isLoading}
           />
         </div>
       </section>

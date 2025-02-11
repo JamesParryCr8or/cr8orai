@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  Message as VercelChatMessage,
-  StreamingTextResponse,
-  createStreamDataTransformer,
-} from "ai";
+import { Message as VercelChatMessage, streamText } from "ai";
 import { createClient } from "@/lib/utils/supabase/server";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
@@ -15,34 +11,9 @@ import {
   StringOutputParser,
 } from "@langchain/core/output_parsers";
 import { toolConfig } from "@/app/(apps)/pdf/toolConfig";
+import { revalidateTag } from "next/cache";
 
 export const runtime = "edge";
-/**
- * API Route: Handles PDF chat interactions using LangChain and OpenAI.
- *
- * **Features:**
- * - Streaming responses for real-time chat interaction
- * - Semantic search in PDF content using vector embeddings
- * - Conversation history management
- * - Context-aware responses based on PDF content
- * - Source tracking for responses
- *
- * **Process:**
- * 1. Authenticates user and manages conversation state
- * 2. Performs semantic search in PDF content
- * 3. Generates context-aware responses
- * 4. Streams response to client
- * 5. Updates conversation history
- *
- * **Technical Details:**
- * - Uses edge runtime for optimal performance
- * - Implements RAG (Retrieval Augmented Generation)
- * - Maintains conversation context
- * - Handles streaming responses with TransformStream
- *
- * @param {NextRequest} request - Contains messages and documentId
- * @returns {Promise<StreamingTextResponse>} Streaming AI response with metadata
- */
 
 /**
  * Combines multiple document chunks into a single context string
@@ -110,18 +81,15 @@ export async function POST(req: NextRequest) {
       -toolConfig.messagesToInclude! - 1,
       -1
     );
-    // const previousMessages = messages.slice(0, -1);
     const currentMessageContent = messages[messages.length - 1].content;
 
     // Initialize Supabase client and verify user
-
     const client = createClient();
     const {
       data: { user },
     } = await client.auth.getUser();
 
     const userId = user?.id;
-
     if (!userId) {
       throw new Error("User not authenticated");
     }
@@ -151,15 +119,14 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (conversationError) throw conversationError;
-
       chatId = newConversation.id;
-
       await client
         .from("pdf_documents")
         .update({ conversation_id: chatId })
         .eq("id", documentId);
     }
 
+    // Create the LangChain Chat model instance (streaming enabled)
     const model = new ChatOpenAI({
       apiKey: process.env.OPENAI_API_KEY!,
       modelName: toolConfig.aiModel,
@@ -168,19 +135,14 @@ export async function POST(req: NextRequest) {
       verbose: true,
     });
 
-    //Use the match_documents query to search through our Vector Embeddings
+    // Set up vector retrieval (limit to top 4 results)
     const vectorstore = new SupabaseVectorStore(new OpenAIEmbeddings(), {
       client,
       tableName: "embeddings",
       queryName: "match_documents",
     });
 
-    const standaloneQuestionChain = RunnableSequence.from([
-      condenseQuestionPrompt,
-      model,
-      new StringOutputParser(),
-    ]);
-
+    // Prepare a promise that will resolve with the relevant documents
     let resolveWithDocuments: (value: Document[]) => void;
     const documentPromise = new Promise<Document[]>((resolve) => {
       resolveWithDocuments = resolve;
@@ -195,10 +157,18 @@ export async function POST(req: NextRequest) {
         },
       ],
       filter: { document_id: documentId },
+      k: 4, // return top 4 relevant document chunks
     });
 
+    // Pipe retrieval results to a function that combines document chunks
     const retrievalChain = retriever.pipe(combineDocumentsFn);
 
+    // Build the chain to first generate a standalone question then answer it.
+    const standaloneQuestionChain = RunnableSequence.from([
+      condenseQuestionPrompt,
+      model,
+      new StringOutputParser(),
+    ]);
     const answerChain = RunnableSequence.from([
       {
         context: RunnableSequence.from([
@@ -211,7 +181,6 @@ export async function POST(req: NextRequest) {
       answerPrompt,
       model,
     ]);
-
     const conversationalRetrievalQAChain = RunnableSequence.from([
       {
         question: standaloneQuestionChain,
@@ -221,11 +190,21 @@ export async function POST(req: NextRequest) {
       new BytesOutputParser(),
     ]);
 
-    const stream = await conversationalRetrievalQAChain.stream({
+    // --- Step 1: Run the LangChain retrieval/answer chain and accumulate its answer ---
+    let aiResponse = "";
+    const chainStream = await conversationalRetrievalQAChain.stream({
       question: currentMessageContent,
       chat_history: formatVercelMessages(previousMessages),
     });
+    const reader = chainStream.getReader();
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      aiResponse += decoder.decode(value);
+    }
 
+    // --- Step 2: Ensure the vector retrieval has completed ---
     const documents = await documentPromise;
     const serializedSources = Buffer.from(
       JSON.stringify(
@@ -238,52 +217,37 @@ export async function POST(req: NextRequest) {
       )
     ).toString("base64");
 
-    // Create a TransformStream to collect AI response while streaming
-    const { readable, writable } = new TransformStream();
-    const writer = writable.getWriter();
-    const reader = stream.getReader();
-    const decoder = new TextDecoder();
-    let aiResponse = "";
-
-    reader.read().then(function processText({ done, value }): any {
-      if (done) {
-        writer.close();
-        return;
-      }
-      aiResponse += decoder.decode(value);
-      writer.write(value);
-      return reader.read().then(processText);
+    // --- Step 3: Update the conversation with the context-aware answer ---
+    messages.push({
+      role: "assistant",
+      content: aiResponse,
     });
+    await client
+      .from("conversations")
+      .update({
+        conversation: messages,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", chatId)
+      .select();
 
-    // Stream the response to the user
-    const responseStream = readable.pipeThrough(createStreamDataTransformer());
-    const response = new StreamingTextResponse(responseStream, {
-      headers: {
-        "x-message-index": (previousMessages.length + 1).toString(),
-        "x-sources": serializedSources,
-      },
-    });
+    // Revalidate the conversation cache
+    revalidateTag(`pdf_conversation_${chatId}`);
 
-    // Wait for the stream to complete
-    writer.closed.then(async () => {
-      // Add AI response to messages
-      messages.push({
+    return NextResponse.json(
+      {
+        id: chatId,
         role: "assistant",
         content: aiResponse,
-      });
-
-      // Update the database after streaming
-      await client
-        .from("conversations")
-        .update({
-          conversation: messages,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", chatId)
-        .select();
-    });
-
-    return response;
+        createdAt: Date.now(),
+      },
+      {
+        headers: {
+          "x-message-index": (previousMessages.length + 1).toString(),
+          "x-sources": serializedSources,
+        },
+      }
+    );
   } catch (e: any) {
     console.error("Error in API:", e);
     return NextResponse.json({ error: e.message }, { status: e.status ?? 500 });
