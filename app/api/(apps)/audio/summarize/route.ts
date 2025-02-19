@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Generate structured summary using ai-sdk
+    // Generate structured summary using xAI instead of LangChain
     const { object: responseData } = await generateObject({
       model: openai(toolConfig.aiModel),
       schema: SummarizeSchema,
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       prompt: transcript,
     });
 
-    console.log("Response from Groq:", responseData);
+    console.log("Response from xAI:", responseData);
 
     const { title, summary, actionItems } = responseData;
 

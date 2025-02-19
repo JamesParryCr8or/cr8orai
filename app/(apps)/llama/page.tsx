@@ -1,47 +1,52 @@
-import Section from "@/components/Section";
-import Navbar from "@/components/navbars/Navbar-1";
-import Hero from "@/components/heros/HeroLlama";
-import Features from "@/components/features/Features-1";
-import Pricing from "@/components/pricing/Pricing-1";
-import CTA from "@/components/ctas/CTA-1";
-import FAQ from "@/components/faqs/FAQ-1";
-import Footer from "@/components/footers/Footer-1";
-import Testimonials from "@/components/testimonials/Testimonials-1";
-
+import InputCapture from "@/components/(apps)/input/input";
+import PaymentModal from "@/components/(ui-components)/paywall/Payment";
 import { toolConfig } from "./toolConfig";
+import { UserGenerations } from "@/components/(apps)/dashboard/text-generations";
+import {
+  getUserGenerations,
+  getSession,
+  getUserCredits,
+} from "@/lib/db/cached-queries";
+import InfoCard from "./info";
 
-export const metadata = {
-  title: toolConfig.metadata.title,
-  description: toolConfig.metadata.description,
-  openGraph: {
-    images: [toolConfig.metadata.og_image],
-  },
-  alternates: {
-    canonical: toolConfig.metadata.canonical,
-  },
-};
+// The main page component where users can create new generations
+export default async function Page() {
+  // Check if a user is logged in
+  const user = await getSession();
 
-export default function Page() {
+  // Set up variables to store user data
+  let credits;
+  let generations: any[] = [];
+
+  // If someone is logged in...
+  if (user?.email) {
+    // If this tool requires payment...
+    if (toolConfig.paywall) {
+      // Check how many credits they have
+      credits = await getUserCredits(user.id);
+
+      // If they don't have enough credits, show the payment screen
+      if (credits < toolConfig.credits) {
+        return <PaymentModal />;
+      }
+    }
+
+    // Get all their previous generations for this tool
+    generations = await getUserGenerations(user.email, "llama");
+  }
+
+  // Show the main page with:
+  // 1. The input form where users can create new generations
+  // 2. A list of their previous generations
   return (
-    <>
-      <div data-theme={toolConfig.company.theme}>
-        <Navbar
-          companyConfig={toolConfig.company!}
-          navbarConfig={toolConfig.navbarLanding!}
-        />
-        <Hero />
-        <Section>
-          <Features />
-          <Testimonials />
-        </Section>
-        <Pricing />
-        <CTA />
-        <FAQ />
-        <Footer
-          companyConfig={toolConfig.company!}
-          footerConfig={toolConfig.footerLanding!}
-        />
-      </div>
-    </>
+    <div data-theme={toolConfig.company.theme} className="bg-white">
+      <InputCapture
+        toolConfig={toolConfig}
+        userEmail={user ? user.email : undefined}
+        credits={toolConfig.paywall ? credits : undefined}
+        emptyStateComponent={<InfoCard />}
+      />
+      <UserGenerations generations={generations} generationType="llama" />
+    </div>
   );
 }

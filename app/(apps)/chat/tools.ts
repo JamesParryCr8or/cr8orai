@@ -344,7 +344,8 @@ export function createTools(
             system: `You are an expert at matching user requirements to software capabilities.
                     Analyze if a single app can fulfill the requirements before suggesting combinations.
                     Only suggest combining apps if a single app cannot provide all needed capabilities.
-                    Focus on core functionality matches rather than peripheral features. If the user is asking for all demo apps, suggest all apps.`,
+                    Focus on core functionality matches rather than peripheral features. If the user is asking for all demo apps, suggest all apps.
+                    ALWAYS return relevant demo applications, even if there isn't an exact match for the user's request!`,
             prompt: JSON.stringify({
               query,
               requirements: query,

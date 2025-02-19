@@ -1,5 +1,5 @@
-import PdfLayout from "@/components/pdf/pdf-layout";
-import PaymentModal from "@/components/paywall/Payment";
+import PdfLayout from "@/components/(apps)/pdf/pdf-layout";
+import PaymentModal from "@/components/(ui-components)/paywall/Payment";
 import { toolConfig } from "./toolConfig";
 import AppInfo from "./info";
 import {

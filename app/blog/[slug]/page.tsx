@@ -3,13 +3,13 @@ import { useMDXComponent } from "next-contentlayer2/hooks";
 import type { MDXComponents } from "mdx/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Hero from "@/components/blog/Hero";
-import Info from "@/components/alerts/Info";
-import Idea from "@/components/alerts/Idea";
-import Image from "@/components/blog/Image";
-import Card from "@/components/blog/Card";
-import Check from "@/components/alerts/Check";
-import Newsletter from "@/components/blog/Newsletter";
+import Hero from "@/components/(ui-components)/blog/Hero";
+import Info from "@/components/(ui-components)/alerts/Info";
+import Idea from "@/components/(ui-components)/alerts/Idea";
+import Image from "@/components/(ui-components)/blog/Image";
+import Card from "@/components/(ui-components)/blog/Card";
+import Check from "@/components/(ui-components)/alerts/Check";
+import Newsletter from "@/components/(ui-components)/blog/Newsletter";
 import { companyConfig } from "@/config";
 
 // Custom MDX components.

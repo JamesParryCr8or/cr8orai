@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { Chat } from "@/components/chat/chat";
+import { Chat } from "@/components/(apps)/chat/chat";
 import { generateUUID } from "@/lib/ai/chat";
 import { availableModels } from "@/lib/ai/models";
 import { getSession } from "@/lib/db/cached-queries";
@@ -18,10 +18,11 @@ export default async function Page() {
   const cookieStore = await cookies();
   const modelIdFromCookie = cookieStore.get("model-id")?.value;
 
-  // Use model from cookie if valid, otherwise fallback to toolConfig.aiModel
+  // Use model from cookie if valid, otherwise fallback to toolConfig.aiModel, then to first available model
   const selectedModelId =
     availableModels.find((model) => model.id === modelIdFromCookie)?.id ||
-    toolConfig.aiModel;
+    toolConfig.aiModel ||
+    availableModels[0].id;
 
   return (
     <Chat

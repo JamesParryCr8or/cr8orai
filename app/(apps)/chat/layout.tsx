@@ -1,5 +1,5 @@
 import { toolConfig } from "./toolConfig";
-import { UnifiedSidebar } from "@/components/dashboard/UnifiedSidebar";
+import { UnifiedSidebar } from "@/components/(apps)/dashboard/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getSession } from "@/lib/db/cached-queries";
 

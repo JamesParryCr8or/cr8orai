@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
-import { Chat as PreviewChat } from "@/components/chat/chat";
+import { Chat as PreviewChat } from "@/components/(apps)/chat/chat";
 import {
   getChatById,
   getMessagesByChatId,
@@ -43,7 +43,8 @@ export default async function Page(props: { params: Promise<any> }) {
 
   const selectedModelId =
     availableModels.find((model) => model.id === modelIdFromCookie)?.id ||
-    toolConfig.aiModel;
+    toolConfig.aiModel ||
+    availableModels[0].id;
 
   return (
     <PreviewChat

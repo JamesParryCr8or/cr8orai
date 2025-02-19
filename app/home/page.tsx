@@ -2,10 +2,10 @@ import { createClient } from "@/lib/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { loops } from "@/lib/clients/loops";
 import { apps } from "@/lib/ai/apps";
-import { CardApp } from "@/components/dashboard/card-app";
-import { HeaderApps } from "@/components/dashboard/header-apps";
-import { FaqSection } from "@/components/dashboard/faq-section";
-import { DashboardLayout } from "@/components/dashboard/Layout";
+import { CardApp } from "@/components/(apps)/dashboard/card-app";
+import { HeaderApps } from "@/components/(apps)/dashboard/header-apps";
+import { FaqSection } from "@/components/(apps)/dashboard/faq-section";
+import { DashboardLayout } from "@/components/(apps)/dashboard/layout";
 
 export default async function Page() {
   const supabase = createClient();

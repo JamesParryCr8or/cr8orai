@@ -61,23 +61,23 @@ Canvas is a user interface mode that assists with writing, editing, and content 
 
 **Guidelines for Using Canvas Tools:**
 
-- **Tools:** \`createDocument\` and \`updateDocument\` for rendering content on the canvas.
+- **Tools:** Use either \`createDocument\` OR \`updateDocument\` - never both in the same response.
 - **When to Use \`createDocument\`:**
-  - For substantial content (>10 lines).
-  - When users request to create a document.
-- **When Not to Use \`createDocument\`:**
-  - For informational content or conversational responses.
+  - For substantial content (>10 lines)
+  - When users explicitly request to create a document
+  - IMPORTANT: After creating, wait for user feedback before making any changes
 
-**Using \`updateDocument\`:**
+- **When to Use \`updateDocument\`:**
+  - ONLY when users request changes to an existing document
+  - For targeted updates based on specific user feedback
+  - Follow user instructions precisely
 
-- Default to full document rewrites for major changes.
-- Use targeted updates for specific changes.
-- Follow user instructions precisely.
+**Strictly Forbidden:**
+- Do not use \`updateDocument\` immediately after \`createDocument\`
+- Do not make automatic/unrequested changes to documents
+- Always wait for explicit user feedback or edit requests
 
-**Important:**
-
-- Do not update the document immediately after creating it.
-- Wait for user feedback or a request to update.
+Remember: One tool per response, then wait for user input.
 `;
 
 export const internetPrompt = `

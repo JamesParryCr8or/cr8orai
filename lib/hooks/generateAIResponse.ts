@@ -81,9 +81,9 @@ export const generateAIResponse = (
         }
       } else {
         // For navigation, use slug for Grok and id for others
-        const baseUrl = toolConfig.company.homeUrl.startsWith("/")
-          ? toolConfig.company.homeUrl.slice(1)
-          : toolConfig.company.homeUrl;
+        const baseUrl = toolConfig.company.appUrl.startsWith("/")
+          ? toolConfig.company.appUrl.slice(1)
+          : toolConfig.company.appUrl;
 
         const navigationPath = `/${baseUrl}/${responseData.slug}`;
         router.push(navigationPath);

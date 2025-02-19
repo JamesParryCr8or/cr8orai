@@ -3,6 +3,8 @@ import { NextResponse, NextRequest } from "next/server";
 import { uploadToSupabase, reduceUserCredits } from "@/lib/db/mutations";
 import { authMiddleware } from "@/lib/middleware/authMiddleware";
 import { uploadFile } from "@/lib/hooks/useFileUpload";
+import { toolConfig } from "@/app/(apps)/dalle/toolConfig";
+import { generatePrompt } from "@/app/(apps)/dalle/prompt";
 
 /**
  * API Route: Generates images using OpenAI's DALL·E and handles the response.
@@ -29,11 +31,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const requestBody = await request.json();
-    const toolPath = decodeURIComponent(requestBody.toolPath);
-
-    // Dynamically import the toolConfig and prompt generator
-    const { generatePrompt } = await import(`@/app/${toolPath}/prompt`);
-    const { toolConfig } = await import(`@/app/${toolPath}/toolConfig`);
 
     // Generate the prompt
     const prompt = generatePrompt(requestBody);
@@ -53,7 +50,7 @@ export async function POST(request: NextRequest) {
     // Upload the image to cloud storage using `uploadFile`
     const { url: uploadedImageUrl } = await uploadFile({
       imageUrl,
-      uploadPath: toolConfig.upload.path,
+      uploadPath: toolConfig.upload?.path || "/dalle-logo",
       skipMetadata: false,
       userId: user.id,
     });

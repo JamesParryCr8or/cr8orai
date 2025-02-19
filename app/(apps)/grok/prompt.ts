@@ -33,8 +33,8 @@ export function generatePrompt(body: any) {
     "  - `subtitle` (String): Funny subtitle about the launch (50-100 chars)\n" +
     "  - `description` (String): Brief, witty description (150-160 chars)\n" +
     "\n2. `launchStats` (Object):\n" +
-    "  - `upvotes` (Number): Realistic upvote count between 0 and 600\n" +
-    "  - `comments` (Number): Comment count\n" +
+    "  - `upvotes` (Number): Random but weighted upvote count - trending products get 300-600, average 100-299, struggling 0-99\n" +
+    "  - `comments` (Number): Proportional to upvotes (typically 10-30% of upvote count)\n" +
     "  - `ranking` (Number): Daily ranking achieved\n" +
     "  - `collections` (Number): Times added to collections\n" +
     "  - `launchScore` (Number): Overall success rating (0-100)\n" +

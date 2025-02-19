@@ -4,6 +4,8 @@ import { uploadToSupabase, reduceUserCredits } from "@/lib/db/mutations";
 import { functionSchema } from "@/app/(apps)/vision/schema";
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { toolConfig } from "@/app/(apps)/vision/toolConfig";
+import { generatePrompt } from "@/app/(apps)/vision/prompt";
 
 /**
  * API Route: Handles image analysis using OpenAI's GPT-4 Vision model.
@@ -47,11 +49,6 @@ export async function POST(request: NextRequest) {
     // Extract request parameters
     const requestBody = await request.json();
     const { imageUrl } = requestBody;
-    const toolPath = decodeURIComponent(requestBody.toolPath);
-
-    // Dynamically import tool configurations
-    const { toolConfig } = await import(`@/app/${toolPath}/toolConfig`);
-    const { generatePrompt } = await import(`@/app/${toolPath}/prompt`);
 
     // Generate prompt for image analysis
     const prompt = generatePrompt(requestBody);

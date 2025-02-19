@@ -94,35 +94,37 @@ export async function POST(request: NextRequest) {
 
       const buffer = await response.arrayBuffer();
 
-      // Improved PDF loader with better text parsing
+      // Load the PDF with improved parsing (splitting by page)
       const loader = new PDFLoader(new Blob([buffer]), {
-        splitPages: true, // Keep pages separate for better context
-        parsedItemSeparator: "", // Prevent extra spaces between elements
+        splitPages: true,
+        parsedItemSeparator: "",
       });
 
       const rawDocs = await loader.load();
 
-      // Improved text splitter with comments
+      // Set up the text splitter with additional separators to help preserve whole sentences/paragraphs
       const textSplitter = new RecursiveCharacterTextSplitter({
-        // Larger chunks preserve more context but cost more to embed
         chunkSize: 1000,
-        // Overlap helps maintain context between chunks
         chunkOverlap: 200,
+        separators: ["\n\n", "\n", " "], // try to break at natural boundaries
       });
 
       const splitDocs = await textSplitter.splitDocuments(rawDocs);
 
-      // Create documents with page numbers and sanitized text
-      return splitDocs.map(
-        (doc) =>
-          new Document<DocumentMetadata>({
-            pageContent: sanitizeText(doc.pageContent),
-            metadata: {
-              document_id: documentId,
-              page: doc.metadata.loc?.pageNumber || 1, // Use PDFLoader's built-in page numbers
-            },
-          })
-      );
+      // Filter out any chunks that are too short to be meaningful,
+      // then create new Documents that include page number metadata.
+      return splitDocs
+        .filter((doc) => doc.pageContent.trim().length > 20)
+        .map(
+          (doc) =>
+            new Document<DocumentMetadata>({
+              pageContent: sanitizeText(doc.pageContent),
+              metadata: {
+                document_id: documentId,
+                page: doc.metadata.loc?.pageNumber || 1,
+              },
+            })
+        );
     } catch (error) {
       console.error("Error fetching documents from URL:", error);
       throw error;

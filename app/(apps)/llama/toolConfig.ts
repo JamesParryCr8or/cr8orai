@@ -7,12 +7,12 @@ export const toolConfig: ToolConfig = {
     name: "BrandingGenerator",
     theme: "branding",
     homeUrl: "/apps/llama",
-    appUrl: "/apps/llama/app",
+    appUrl: "/apps/llama",
     description:
       "Build your own Llama 3 AI wrapper in minutes with this demo app that uses Groq, LangChain & Supabase.",
     logo: "https://cdn2.iconfinder.com/data/icons/privacy-policy/512/privacy-data-policy-security-05-512.png",
     navbarLinks: [
-      { label: "App", href: `/apps/llama/app` },
+      { label: "App", href: `/apps/llama` },
       { label: "Home", href: "/" },
       { label: "Other apps", href: "/apps" },
       { label: "Blog", href: "/blog" },
@@ -24,7 +24,7 @@ export const toolConfig: ToolConfig = {
     description:
       "Build your own Llama 3 AI wrapper in minutes with this demo app that uses Groq, LangChain & Supabase.",
     og_image: "https://anotherwrapper.com/og.png",
-    canonical: "https://anotherwrapper.com/apps/groq/llama",
+    canonical: "https://anotherwrapper.com/apps/llama",
   },
 
   ////// Paywall

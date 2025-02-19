@@ -1,8 +1,8 @@
 import { apps } from "@/lib/ai/apps";
-import { CardApp } from "@/components/dashboard/card-app";
-import { HeaderApps } from "@/components/dashboard/header-apps";
-import { FaqSection } from "@/components/dashboard/faq-section";
-import { DashboardLayout } from "@/components/dashboard/Layout";
+import { CardApp } from "@/components/(apps)/dashboard/card-app";
+import { HeaderApps } from "@/components/(apps)/dashboard/header-apps";
+import { FaqSection } from "@/components/(apps)/dashboard/faq-section";
+import { DashboardLayout } from "@/components/(apps)/dashboard/layout";
 
 export const metadata = {
   title: "Next.js Templates & AI Boilerplate Code | AI Wrapper Templates",

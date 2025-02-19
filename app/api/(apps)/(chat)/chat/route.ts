@@ -297,9 +297,14 @@ export async function POST(request: Request) {
       maxSteps: 5,
       experimental_activeTools: activeTools,
       tools: createTools(streamingData, user.id, modelToUse, isBrowseEnabled),
-      onFinish: async ({ responseMessages }) => {
+      onFinish: async (result) => {
         if (user && user.id) {
           try {
+            // Get messages from the response
+            const responseMessages = result.steps.flatMap(
+              (step) => step.response?.messages || []
+            );
+
             const responseMessagesWithoutIncompleteToolCalls =
               sanitizeResponseMessages(responseMessages);
 

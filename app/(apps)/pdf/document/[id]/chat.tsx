@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChatWindow } from "@/components/pdf/chat-window";
-import ChatWelcome from "@/components/pdf/chat-welcome";
+import { ChatWindow } from "@/components/(apps)/pdf/chat-window";
+import ChatWelcome from "@/components/(apps)/pdf/chat-welcome";
 import { Switch } from "@/components/ui/switch";
 
 export default function DocumentClient({

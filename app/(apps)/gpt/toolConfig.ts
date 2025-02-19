@@ -6,13 +6,13 @@ export const toolConfig: ToolConfig = {
   company: {
     name: "MarketingPlanor",
     theme: "marketing",
-    homeUrl: "/apps/gpt",
-    appUrl: "/apps/gpt/app",
+    homeUrl: "/landing-pages/gpt",
+    appUrl: "/apps/gpt",
     description:
       "Build your own GPT-4o Mini AI wrapper in minutes with this demo app that uses OpenAI, LangChain & Supabase.",
     logo: "https://cdn2.iconfinder.com/data/icons/custom-ios-14-1/60/Camera-512.png",
     navbarLinks: [
-      { label: "App", href: `/apps/gpt/app` },
+      { label: "App", href: `/apps/gpt` },
       { label: "Home", href: "/" },
       { label: "Other apps", href: "/apps" },
       { label: "Blog", href: "/blog" },

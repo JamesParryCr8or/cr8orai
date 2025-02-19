@@ -54,4 +54,5 @@ export const businessPlanSchema = z.object({
   }),
 });
 
+// Export the schema in a way that matches the Vercel AI SDK's expectations
 export const functionSchema = businessPlanSchema;

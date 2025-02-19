@@ -1,42 +1,22 @@
-import { AppInfoCard } from "@/app/(apps)/app-info-card";
-import { AnimatedBeamMultipleInputDemo } from "@/components/magicui/animated-beam-multiple";
-import { FileText } from "lucide-react";
+"use client";
 
-export default function PdfAppInfo() {
+import { AppInfoTemplate } from "@/components/(apps)/dashboard/app-info-template";
+
+export default function PDFInfo() {
   return (
-    <AppInfoCard
-      title="Chat with your PDF documents"
-      colorScheme={{
-        background: "bg-gradient-to-br from-primary/5 to-primary/10",
-        border: "border-primary/10",
-        text: "text-primary",
-        textMuted: "text-primary",
-      }}
-      overview={{
-        icon: <FileText className="w-5 h-5" />,
-        title: "PDF Chat Demo App Overview",
-        description:
-          "This demo app uses OpenAI and LangChain.js to process PDF documents and enable intelligent chat interactions. You can use the building blocks of this app to create your own AI apps. Includes complete source code and",
-        docsLink: {
-          href: "https://docs.anotherwrapper.com/ai/pdf",
-          text: "documentation.",
+    <AppInfoTemplate
+      heroImage="https://images.unsplash.com/photo-1521572063439-8a4186b6d843?q=80&w=2680&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      heroTitle="Chat with Your PDF Documents"
+      heroDescription="Interact with your PDF documents using AI-powered chat. Built with OpenAI and LangChain for intelligent document processing."
+      features={[
+        {
+          icon: "📄",
+          title: "PDF Processing",
+          description:
+            "Advanced document processing with vector storage and embeddings for intelligent chat interactions.",
+          hours: "25+ hours",
         },
-      }}
-      animation={<AnimatedBeamMultipleInputDemo />}
-      implementation={{
-        frontend: {
-          path: "app/(apps)/pdf/*",
-          description: "React Components using TailwindCSS & shadcn/ui",
-        },
-        backend: {
-          path: "app/api/(apps)/pdf/*",
-          description: "Next.js API Routes, OpenAI Integration, Vector Storage",
-        },
-        ai: {
-          path: "app/(apps)/pdf/*",
-          description: "Document Processing, Embeddings, Chat Logic",
-        },
-      }}
+      ]}
     />
   );
 }

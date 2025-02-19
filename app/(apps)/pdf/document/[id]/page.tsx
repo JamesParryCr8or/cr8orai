@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Chat from "./chat";
 import { toolConfig } from "../../toolConfig";
-import PaymentModal from "@/components/paywall/Payment";
+import PaymentModal from "@/components/(ui-components)/paywall/Payment";
 import {
   getSession,
   getUserCredits,

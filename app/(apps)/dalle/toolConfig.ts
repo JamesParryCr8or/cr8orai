@@ -6,13 +6,13 @@ export const toolConfig: ToolConfig = {
   company: {
     name: "DALLEStudio",
     theme: "logo",
-    homeUrl: "/apps/dalle",
-    appUrl: "/apps/dalle/app",
+    homeUrl: "/landing-pages/dalle",
+    appUrl: "/apps/dalle",
     description:
       "Build your own Dalle 3 AI wrapper logo generator in minutes with this demo app that uses OpenAI, Cloudflare R2 & Supabase.",
     logo: "https://cdn0.iconfinder.com/data/icons/lifestyle-entertainment-vol-2/512/museum_art_painting_artist-512.png",
     navbarLinks: [
-      { label: "App", href: `/apps/dalle/app` },
+      { label: "App", href: `/apps/dalle` },
       { label: "Home", href: "/" },
       { label: "Other apps", href: "/apps" },
       { label: "Blog", href: "/blog" },

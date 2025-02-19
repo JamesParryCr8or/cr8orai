@@ -1,45 +1,52 @@
-import Section from "@/components/Section";
-import Navbar from "@/components/navbars/Navbar-1";
-import Hero from "@/components/heros/HeroWhisper";
-import Features from "@/components/features/Features-1";
-import Testimonials from "@/components/testimonials/Testimonials-1";
-import Pricing from "@/components/pricing/Pricing-1";
-import CTA from "@/components/ctas/CTA-1";
-import FAQ from "@/components/faqs/FAQ-1";
-import Footer from "@/components/footers/Footer-1";
+import RecordAudio from "@/components/(apps)/audio/record-audio";
+import PaymentModal from "@/components/(ui-components)/paywall/Payment";
 import { toolConfig } from "./toolConfig";
+import AudioInfo from "./info";
+import Login from "@/components/(apps)/input/login";
+import {
+  getSession,
+  getUserCredits,
+  getUserRecordings,
+} from "@/lib/db/cached-queries";
 
-export const metadata = {
-  title: toolConfig.metadata.title,
-  description: toolConfig.metadata.description,
-  openGraph: {
-    images: [toolConfig.metadata.og_image],
-  },
-  alternates: {
-    canonical: toolConfig.metadata.canonical,
-  },
-};
+export default async function Page() {
+  const user = await getSession();
 
-export default function Page() {
+  let credits;
+  let recordings;
+
+  if (user) {
+    if (toolConfig.paywall) {
+      credits = await getUserCredits(user.id);
+
+      if (credits < toolConfig.credits) {
+        return <PaymentModal />;
+      }
+    }
+
+    try {
+      recordings = await getUserRecordings(user.id);
+    } catch (error) {
+      console.error("Error fetching recordings:", error);
+      return <div>Error fetching recordings</div>;
+    }
+  }
+
   return (
     <>
-      <div data-theme={toolConfig.company.theme}>
-        <Navbar
-          companyConfig={toolConfig.company!}
-          navbarConfig={toolConfig.navbarLanding!}
-        />
-        <Hero />
-        <Section>
-          <Testimonials />
-          <Features />
-        </Section>
-        <Pricing />
-        <CTA />
-        <FAQ />
-        <Footer
-          companyConfig={toolConfig.company!}
-          footerConfig={toolConfig.footerLanding!}
-        />
+      <div className="w-full flex flex-col md:flex-row items-start">
+        {user ? (
+          <div className="mt-5 w-full md:w-1/2">
+            <RecordAudio user={user} recordings={recordings} />
+          </div>
+        ) : (
+          <div className="w-full md:w-1/2 px-2">
+            <Login />
+          </div>
+        )}
+        <div className="w-full md:w-1/2">
+          <AudioInfo />
+        </div>
       </div>
     </>
   );

@@ -6,13 +6,13 @@ export const toolConfig: ToolConfig = {
   company: {
     name: "VoiceToNotes",
     theme: "whisper",
-    homeUrl: "/apps/audio",
-    appUrl: "/apps/audio/app",
+    homeUrl: "/landing-pages/audio",
+    appUrl: "/apps/audio",
     description:
       "Build an AI wrapper that generates transcripts from your voice recordings using Whisper on Replicate and summarize them using Llama 3 from Groq.",
     logo: "https://cdn0.iconfinder.com/data/icons/phosphor-regular-vol-3/256/microphone-1024.png",
     navbarLinks: [
-      { label: "App", href: `/apps/audio/app` },
+      { label: "App", href: `/apps/audio` },
       { label: "Home", href: "/" },
       { label: "Other apps", href: "/apps" },
       { label: "Blog", href: "/blog" },

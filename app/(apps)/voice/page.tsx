@@ -1,5 +1,7 @@
-import Layout from "@/components/voice/Layout";
-import PaymentModal from "@/components/paywall/Payment";
+import { TextToSpeechTab } from "@/components/(apps)/voice/text-to-speech";
+import AppInfo from "./info";
+import Login from "@/components/(apps)/input/login";
+import PaymentModal from "@/components/(ui-components)/paywall/Payment";
 import { toolConfig } from "./toolConfig";
 import {
   getSession,
@@ -30,8 +32,21 @@ export default async function Page() {
   }
 
   return (
-    <>
-      <Layout userEmail={user?.email} />
-    </>
+    <section className="relative min-h-screen">
+      <div className="flex flex-col md:flex-row items-start no-scrollbar">
+        <div className="w-full px-8 md:w-1/2">
+          {user?.email ? (
+            <div className="mt-5 flex justify-center mb-6 mx-auto p-4">
+              <TextToSpeechTab />
+            </div>
+          ) : (
+            <Login />
+          )}
+        </div>
+        <div className="w-full md:w-1/2 no-scrollbar">
+          <AppInfo />
+        </div>
+      </div>
+    </section>
   );
 }
