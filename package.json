@@ -120,6 +120,14 @@
   "pnpm": {
     "overrides": {
       "@ai-sdk/provider": "1.0.7"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "contentlayer2",
+      "core-js",
+      "esbuild",
+      "protobufjs",
+      "sharp",
+      "supabase"
+    ]
   }
 }
