@@ -116,19 +116,5 @@
   "overrides": {
     "@ai-sdk/provider": "1.0.7",
     "whatwg-url": "^13.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@ai-sdk/provider": "1.0.7"
-    },
-    "onlyBuiltDependencies": [
-      "contentlayer2",
-      "core-js",
-      "esbuild",
-      "protobufjs",
-      "sharp",
-      "supabase"
-    ],
-    "npmRegistry": "https://registry.npmjs.org/"
   }
 }
