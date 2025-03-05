@@ -1,0 +1,311 @@
+# CR8OR AI - Next.js AI Application Platform
+
+
+## Overview
+CR8OR AI is a modern AI-powered application platform built with Next.js 14, featuring multiple AI integrations including OpenAI, Anthropic, Groq, and others. The platform provides a robust foundation for building AI-powered applications with features like authentication, blog functionality, and various UI components.
+
+
+## Directory Structure
+
+
+Core Directories
+​
+1. /app
+The main application directory containing:
+
+
+/app/(apps): All demo applications
+/app/(landing-pages): Landing pages consolidated in one place
+/app/api: API endpoints and routes
+/app/auth: Authentication and session management
+/app/blog: Blog pages and content
+​
+2. /components
+UI components organized as:
+
+
+/components/(ui-components): Shared UI components (heroes, navbars, etc.)
+/components/(apps): App-specific components
+Built on shadcn/ui and magicui
+​
+3. /lib
+Core utilities and shared functionality:
+
+
+/lib/ai: AI-related utilities and configurations
+/lib/db: Database operations
+/lib/clients: API clients and integrations
+/lib/hooks: Custom React hooks
+/lib/utils: Helper functions
+/lib/types: TypeScript definitions
+​
+4. /blog
+Blog post content and related assets.
+
+
+​
+5. config.ts
+Core configuration file for website settings.
+
+
+​
+Demo Applications
+Each demo application in /app/(apps) is structured consistently across three locations:
+
+
+Frontend pages & config: /app/(apps)/*
+UI components: /components/(apps)/*
+API routes: /app/api/(apps)/*
+Current demo apps include:
+
+
+Chat: Advanced AI assistant with generative UI
+PDF: Chat with PDF capabilities using OpenAI and LangChain
+Audio: Transcription using Whisper & LLaMA 3
+GPT: GPT-4 and GPT-4V integration
+DALL·E: Image generation
+Vision: OpenAI vision capabilities
+LLaMA: LLaMA 3 integration
+SDXL: Stable Diffusion XL
+Claude: Claude 3.5 Sonnet integration
+Grok: xAI’s Grok model
+Voice: Elevenlabs voice capabilities
+​
+Working with Demo Apps
+​
+Extracting Individual Apps
+You can easily extract any demo app from the codebase. For example, to use just the chat app:
+
+
+Keep these folders:
+
+
+/app/(apps)/chat
+/components/(apps)/chat
+/app/api/(apps)/chat
+Retain necessary shared components from:
+
+
+/components/(ui-components)
+/lib utilities
+Remove other app folders as needed
+
+
+This modular structure allows you to maintain only the features you need while keeping your codebase clean and focused.
+
+
+├── supabase/ # Supabase configuration and types
+
+
+
+
+## Tech Stack
+
+
+### Core Technologies
+- Next.js 14
+- TypeScript
+- React 18
+- Supabase (Authentication & Database)
+- TailwindCSS
+
+
+### AI Integrations
+- OpenAI
+- Eleven Labs
+- Anthropic
+- Groq
+- Replicate
+- LangChain
+
+
+### UI Components
+- Radix UI
+- Headless UI
+- DaisyUI
+- Framer Motion
+- Tailwind Typography
+
+
+### Development Tools
+- ContentLayer (for MDX processing)
+- PostHog (Analytics)
+- Stripe (Payments)
+- Cloudflare R2 (File Storage)
+
+
+## Key Features
+1. **Authentication System**
+   - Supabase-powered auth
+   - Protected routes
+   - User management
+
+
+2. **AI Integration Hub**
+   - Multiple AI provider support
+   - LangChain integration
+   - PDF parsing capabilities
+
+
+3. **Blog Platform**
+   - MDX support
+   - Content management
+   - SEO optimization
+
+
+4. **UI Components**
+   - Rich component library
+   - Responsive design
+   - Accessible components
+
+
+## Setup Guide
+
+
+### Prerequisites
+- Node.js 18+
+- npm or pnpm
+
+
+### Installation
+```bash
+# Clone the repository
+git clone [repository-url]
+
+
+# Install dependencies
+npm install
+# or
+pnpm install
+
+
+# Set up environment variables
+cp .env.example .env
+```
+
+
+### Environment Variables Required
+```env
+# Core
+NEXT_PUBLIC_APP_URL=
+NODE_ENV=
+
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+
+# AI Providers
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GROQ_API_KEY=
+
+
+# Additional Services
+STRIPE_SECRET_KEY=
+POSTHOG_KEY=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+```
+
+
+### Development
+```bash
+# Run development server
+npm run dev
+# or
+pnpm dev
+```
+
+
+## Deployment
+
+
+### Vercel Deployment
+1. Connect your GitHub repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Deploy using default settings
+
+
+### Build Commands
+```bash
+# Production build
+npm run build
+# or
+pnpm build
+
+
+# Start production server
+npm start
+# or
+pnpm start
+```
+
+
+## Common Issues & Troubleshooting
+
+
+### Package Installation Issues
+If encountering pnpm-related errors during deployment:
+1. Delete `pnpm-lock.yaml`
+2. Remove pnpm-specific settings from `package.json`
+3. Switch to npm:
+   ```bash
+   rm -rf node_modules
+   npm install
+   ```
+
+
+### AI Integration Issues
+- Ensure all AI provider API keys are properly configured
+- Check rate limits and quotas
+- Verify network connectivity to AI services
+
+
+### Database Connection Issues
+- Verify Supabase credentials
+- Check database connection string
+- Ensure proper role permissions
+
+
+## Contributing Guidelines
+
+
+1. Fork the repository
+2. Create a feature branch
+3. Follow code style guidelines:
+   - Use TypeScript
+   - Follow Next.js best practices
+   - Implement proper error handling
+   - Add necessary types
+4. Submit a pull request
+
+
+## Performance Considerations
+
+
+- Uses React Server Components where possible
+- Implements proper loading states
+- Optimizes images using `next/image`
+- Implements proper caching strategies
+- Uses proper error boundaries
+
+
+## Security Features
+
+
+- Environment variable protection
+- API key security
+- Protected routes
+- Input validation
+- Type safety
+- SQL injection protection via Supabase
+
+
+## License
+Private repository - All rights reserved
+
+
+

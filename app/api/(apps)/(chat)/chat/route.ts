@@ -112,6 +112,26 @@ async function getUser() {
   return user;
 }
 
+// First, define the proper types
+interface ToolCallPart {
+  type: "tool-call";
+  toolCallId: string;
+  toolName: string;
+  args: any;
+}
+
+interface ReasoningPart {
+  type: "reasoning";
+  content: string;
+}
+
+interface RedactedReasoningPart {
+  type: "redacted-reasoning";
+  content: string;
+}
+
+type ContentPart = ToolCallPart | ReasoningPart | RedactedReasoningPart;
+
 /**
  * Formats message content for database storage based on message type
  * Handles different message formats:
