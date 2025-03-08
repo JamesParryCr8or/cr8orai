@@ -489,3 +489,5 @@ While we recommend Vercel, you can also use:
 - AWS Amplify (powerful but requires AWS knowledge)
 
 These alternatives might need different setup steps - check their docs if you want to use them!
+#   c r 8 o r a i b a c k u p  
+ 
